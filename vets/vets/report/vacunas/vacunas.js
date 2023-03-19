@@ -15,6 +15,20 @@ frappe.query_reports["Vacunas"] = {
 			"fieldname": "patient",
 			"fieldtype": "Link",
 			"options": "Patient",
+			"get_query": () => {
+				let customer = frappe.query_report.get_filter_value("customer")
+				if (!!customer)
+					return {
+						"filters": {
+							"customer": frappe.query_report.get_filter_value("customer"),
+						} 
+					}
+				else
+					return {
+						"filters": {}
+					}
+
+			},
 		},
 		{
 			"label": __("Servicio de Vacunas"),
@@ -27,11 +41,9 @@ frappe.query_reports["Vacunas"] = {
 		value = default_formatter(value, row, column, data);
 		
 		if(column.id == "due_date"){
-			let color = get_indicator(data.due_date)
-
 			value = `
-				<span style="font-size: 10px; margin-left:-5px;" class="indicator-pill ${color}">
-					<span  style="font-size: 12px; ${color}"><b>${value}</b></span>
+				<span style="font-size: 10px; margin-left:-5px;" class="indicator-pill ${data.color}">
+					<span  style="font-size: 12px; ${data.color}"><b>${value}</b></span>
 				</span>
 			`
 
@@ -49,13 +61,3 @@ frappe.query_reports["Vacunas"] = {
 		
 	}
 };
-
-function get_indicator(expiration){
-	const today = frappe.datetime.now_date();
-	const day_diff = frappe.datetime.get_day_diff(expiration, today);
-	
-	if (day_diff >= 0 && day_diff <= 30)
-		return 'blue'
-	
-	return today > expiration ? 'red': 'green'
-}
